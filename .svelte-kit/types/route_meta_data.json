@@ -1,0 +1,18 @@
+{
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/api/session/answer": [
+		"src/routes/api/session/answer/+server.ts"
+	],
+	"/api/session/complete": [
+		"src/routes/api/session/complete/+server.ts"
+	],
+	"/api/session/profile": [
+		"src/routes/api/session/profile/+server.ts"
+	],
+	"/api/session/start": [
+		"src/routes/api/session/start/+server.ts"
+	]
+}

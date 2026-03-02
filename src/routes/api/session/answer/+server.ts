@@ -1,0 +1,54 @@
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+export const POST: RequestHandler = async ({ request }) => {
+  const body = await request.json();
+  const {
+    sessionId,
+    questionId,
+    questionType,
+    topic,
+    selectedOptionId,
+    isCorrect,
+    textAnswer,
+    timeMs,
+  } = body as {
+    sessionId: string;
+    questionId: string;
+    questionType: string;
+    topic: string;
+    selectedOptionId?: string;
+    isCorrect?: boolean;
+    textAnswer?: string;
+    timeMs: number;
+  };
+
+  if (!sessionId || !questionId || timeMs == null) {
+    return json({ ok: false }, { status: 400 });
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseKey) {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      await supabase.from('quiz_answers').insert({
+        session_id: sessionId,
+        question_id: questionId,
+        question_type: questionType,
+        topic,
+        selected_option_id: selectedOptionId ?? null,
+        is_correct: isCorrect ?? null,
+        text_answer: textAnswer ?? null,
+        time_ms: timeMs,
+      });
+      await supabase.from('quiz_sessions').update({ last_seen_at: new Date().toISOString() }).eq('id', sessionId);
+    } catch (err) {
+      console.error('Supabase insert answer:', err);
+    }
+  }
+
+  return json({ ok: true });
+};
